@@ -1,12 +1,13 @@
-//Pessoa 2
 import {
   listarMusicas,
   listarPlaylists,
   consultarPlaylist,
   criarPlaylist,
+  renomearPlaylist,
   excluirPlaylist,
   adicionarMusica,
   removerMusica,
+  reordenar,
 } from './api.js';
 import { tocar } from './player.js';
 
@@ -139,11 +140,11 @@ async function abrirPlaylist(id) {
   try {
     const playlist = await consultarPlaylist(id);
     const musicas = Array.isArray(playlist.musicas) ? playlist.musicas : [];
+    let ordemAlterada = false;
 
     container.replaceChildren();
 
     const painel = document.createElement('div');
-    painel.style.cssText = 'border: 2px dashed #007bff; padding: 15px; border-radius: 8px;';
 
     const titulo = document.createElement('h2');
     titulo.textContent = `Playlist: ${playlist.nome}`;
@@ -156,33 +157,6 @@ async function abrirPlaylist(id) {
 
     const listaMusicas = document.createElement('ul');
 
-    if (musicas.length === 0) {
-      const itemVazio = document.createElement('li');
-      itemVazio.textContent = 'Nenhuma música adicionada ainda.';
-      listaMusicas.appendChild(itemVazio);
-    } else {
-      musicas.forEach((musica) => {
-        const item = document.createElement('li');
-        const nome = document.createElement('strong');
-        nome.textContent = musica.nome;
-
-        const formato = document.createTextNode(` (${musica.formato}) `);
-        const botaoRemover = criarBotao('Remover', async () => {
-          try {
-            await removerMusica(playlist.id, musica.id);
-            mostrarMensagem('Música removida da playlist.');
-            await abrirPlaylist(playlist.id);
-            await carregarPlaylists();
-          } catch (erro) {
-            mostrarMensagem(`Erro ao remover música: ${erro.message}`);
-          }
-        });
-
-        item.append(nome, formato, botaoRemover);
-        listaMusicas.appendChild(item);
-      });
-    }
-
     const botaoTocar = criarBotao('▶ Tocar Playlist', () => {
       if (musicas.length === 0) {
         mostrarMensagem('A playlist está vazia.');
@@ -192,6 +166,131 @@ async function abrirPlaylist(id) {
       tocar(musicas, 0);
     });
     botaoTocar.disabled = musicas.length === 0;
+
+    const formularioEditar = document.createElement('form');
+    formularioEditar.className = 'form-editar-playlist';
+
+    const nomeEditado = document.createElement('input');
+    nomeEditado.type = 'text';
+    nomeEditado.value = playlist.nome;
+    nomeEditado.maxLength = 100;
+    nomeEditado.required = true;
+    nomeEditado.setAttribute('aria-label', 'Nome da playlist');
+
+    const descricaoEditada = document.createElement('input');
+    descricaoEditada.type = 'text';
+    descricaoEditada.value = playlist.descricao || '';
+    descricaoEditada.maxLength = 500;
+    descricaoEditada.placeholder = 'Descrição (opcional)';
+    descricaoEditada.setAttribute('aria-label', 'Descrição da playlist');
+
+    const botaoSalvarEdicao = document.createElement('button');
+    botaoSalvarEdicao.type = 'submit';
+    botaoSalvarEdicao.textContent = 'Salvar alterações';
+
+    formularioEditar.append(nomeEditado, descricaoEditada, botaoSalvarEdicao);
+    formularioEditar.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      botaoSalvarEdicao.disabled = true;
+
+      try {
+        await renomearPlaylist(
+          playlist.id,
+          nomeEditado.value.trim(),
+          descricaoEditada.value.trim()
+        );
+        mostrarMensagem('Playlist atualizada com sucesso.');
+        await carregarPlaylists();
+        await abrirPlaylist(playlist.id);
+      } catch (erro) {
+        mostrarMensagem(`Erro ao atualizar playlist: ${erro.message}`);
+      } finally {
+        botaoSalvarEdicao.disabled = false;
+      }
+    });
+
+    const controlesOrdem = document.createElement('div');
+    controlesOrdem.className = 'controles-ordem-playlist';
+    const botaoSalvarOrdem = criarBotao('Salvar ordem', async () => {
+      botaoSalvarOrdem.disabled = true;
+
+      try {
+        await reordenar(playlist.id, musicas.map((musica) => musica.id));
+        mostrarMensagem('Ordem das músicas salva.');
+        await abrirPlaylist(playlist.id);
+      } catch (erro) {
+        mostrarMensagem(`Erro ao salvar a ordem: ${erro.message}`);
+        botaoSalvarOrdem.disabled = false;
+      }
+    });
+    botaoSalvarOrdem.disabled = true;
+
+    function moverMusica(indice, deslocamento) {
+      const novoIndice = indice + deslocamento;
+      if (novoIndice < 0 || novoIndice >= musicas.length) return;
+
+      [musicas[indice], musicas[novoIndice]] = [musicas[novoIndice], musicas[indice]];
+      ordemAlterada = true;
+      renderizarMusicas();
+      botaoSalvarOrdem.disabled = false;
+    }
+
+    function renderizarMusicas() {
+      listaMusicas.replaceChildren();
+
+      if (musicas.length === 0) {
+        const itemVazio = document.createElement('li');
+        itemVazio.textContent = 'Nenhuma música adicionada ainda.';
+        listaMusicas.appendChild(itemVazio);
+        botaoTocar.disabled = true;
+        botaoSalvarOrdem.disabled = true;
+        return;
+      }
+
+      botaoTocar.disabled = false;
+      musicas.forEach((musica, indice) => {
+        const item = document.createElement('li');
+        const nome = document.createElement('strong');
+        nome.textContent = musica.nome;
+        const formato = document.createTextNode(` (${musica.formato}) `);
+
+        const botaoSubir = criarBotao('↑', () => moverMusica(indice, -1));
+        botaoSubir.className = 'btn-mover-musica';
+        botaoSubir.disabled = indice === 0;
+        botaoSubir.setAttribute('aria-label', `Mover ${musica.nome} para cima`);
+
+        const botaoDescer = criarBotao('↓', () => moverMusica(indice, 1));
+        botaoDescer.className = 'btn-mover-musica';
+        botaoDescer.disabled = indice === musicas.length - 1;
+        botaoDescer.setAttribute('aria-label', `Mover ${musica.nome} para baixo`);
+
+        const botaoRemover = criarBotao('Remover', async () => {
+          try {
+            if (ordemAlterada) {
+              await reordenar(playlist.id, musicas.map((itemMusica) => itemMusica.id));
+            }
+            await removerMusica(playlist.id, musica.id);
+            mostrarMensagem('Música removida da playlist.');
+            await abrirPlaylist(playlist.id);
+            await carregarPlaylists();
+          } catch (erro) {
+            mostrarMensagem(`Erro ao remover música: ${erro.message}`);
+          }
+        });
+
+        item.append(
+          nome,
+          formato,
+          botaoSubir,
+          botaoDescer,
+          botaoRemover
+        );
+        listaMusicas.appendChild(item);
+      });
+    }
+
+    renderizarMusicas();
+    controlesOrdem.appendChild(botaoSalvarOrdem);
 
     const areaAdicionar = document.createElement('div');
     const tituloAdicionar = document.createElement('h4');
@@ -238,8 +337,10 @@ async function abrirPlaylist(id) {
     painel.append(
       titulo,
       descricao,
+      formularioEditar,
       tituloMusicas,
       listaMusicas,
+      controlesOrdem,
       botaoTocar,
       areaAdicionar
     );
