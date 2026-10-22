@@ -1,4 +1,3 @@
-/* Pessoa 3: estilo do player fixo no rodapé */
 #player {
   position: fixed;
   z-index: 1000;
@@ -21,6 +20,7 @@
 }
 
 .player-info {
+  flex: 0 1 25%;
   width: 25%;
   min-width: 0;
   overflow: hidden;
@@ -65,32 +65,91 @@
 
 .player-progresso-area {
   display: flex;
+  flex: 1 1 40%;
   align-items: center;
   gap: 9px;
-  width: 40%;
+  min-width: 0;
+  width: auto;
   color: #d8dfd1;
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
 }
 
 .player-progresso-area input[type="range"] {
-  width: 100%;
-  height: 5px;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   accent-color: #c2a765;
   cursor: pointer;
 }
 
+.player-progresso-area input[type="range"]::-webkit-slider-runnable-track,
+.player-volume-area input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: #817f73;
+  border-radius: 999px;
+}
+
+.player-progresso-area input[type="range"]::-moz-range-track,
+.player-volume-area input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: #817f73;
+  border-radius: 999px;
+}
+
+.player-progresso-area input[type="range"]::-webkit-slider-thumb,
+.player-volume-area input[type="range"]::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #c2a765;
+  border: 0;
+  border-radius: 50%;
+}
+
+.player-progresso-area input[type="range"]::-moz-range-thumb,
+.player-volume-area input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #c2a765;
+  border: 0;
+  border-radius: 50%;
+}
+
 .player-volume-area {
   display: flex;
+  flex: 0 1 15%;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   width: 15%;
   color: #e6d6a9;
 }
 
 .player-volume-area input[type="range"] {
-  width: 100%;
-  height: 5px;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  min-height: 0;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   accent-color: #c2a765;
   cursor: pointer;
 }
@@ -103,28 +162,35 @@
   }
 
   .player-info {
-    width: 22%;
+    flex-basis: 15%;
+    width: 15%;
     font-size: 0.8rem;
   }
 
   .player-controles {
+    min-width: 0;
     gap: 0;
   }
 
   .btn-player {
-    min-width: 32px;
+    min-width: 28px;
     padding: 4px;
     font-size: 15px;
   }
 
+  #btn-loop span {
+    display: none;
+  }
+
   .player-progresso-area {
+    flex-basis: 31%;
     gap: 5px;
-    width: 38%;
     font-size: 0.72rem;
   }
 
   .player-volume-area {
+    flex-basis: 20%;
+    width: 20%;
     gap: 4px;
-    width: 12%;
   }
 }
