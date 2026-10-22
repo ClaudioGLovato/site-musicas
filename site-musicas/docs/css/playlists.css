@@ -22,8 +22,23 @@
 #mensagem-playlists {
   min-height: 1.5em;
   margin: 8px 0 14px;
-  color: var(--terra);
   font-weight: 600;
+}
+
+#mensagem-playlists.mensagem-playlists-erro {
+  padding: 10px 12px;
+  color: #7b3e2d;
+  background: #f7e8df;
+  border: 1px solid #e9cabc;
+  border-radius: 8px;
+}
+
+#mensagem-playlists.mensagem-playlists-sucesso {
+  padding: 10px 12px;
+  color: #315b3d;
+  background: #e5efdf;
+  border: 1px solid #c7dbc0;
+  border-radius: 8px;
 }
 
 #lista-playlists {
