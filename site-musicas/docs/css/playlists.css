@@ -1,1 +1,21 @@
 /* Pessoa 2: estilo da tela de playlists */
+.playlist-item {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.playlist-item h3 {
+    margin: 0 0 5px 0;
+}
+
+.playlist-item p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+#detalhe-playlist {
+    margin-top: 20px;
+}
