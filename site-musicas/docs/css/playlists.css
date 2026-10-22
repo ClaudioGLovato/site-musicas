@@ -1,4 +1,3 @@
-/* Pessoa 2: estilo da tela de playlists */
 #form-criar-playlist {
   display: flex;
   flex-wrap: wrap;
@@ -98,6 +97,30 @@
   margin: 20px 0 10px;
 }
 
+#detalhe-playlist .form-editar-playlist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px;
+  background: #f5f6ef;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+}
+
+#detalhe-playlist .form-editar-playlist input {
+  flex: 1 1 190px;
+  min-width: 0;
+}
+
+#detalhe-playlist .form-editar-playlist button {
+  color: #fffefa;
+  background: var(--verde-floresta);
+}
+
+#detalhe-playlist .form-editar-playlist button:hover:not(:disabled) {
+  background: #315d48;
+}
+
 #detalhe-playlist p {
   color: var(--texto-suave);
 }
@@ -118,6 +141,19 @@
   color: var(--verde-floresta);
 }
 
+#detalhe-playlist li .btn-mover-musica {
+  min-width: 34px;
+  min-height: 34px;
+  margin-left: 5px;
+  padding: 4px 8px;
+  color: var(--verde-floresta);
+  background: var(--verde-claro);
+}
+
+#detalhe-playlist li .btn-mover-musica:hover:not(:disabled) {
+  background: #d4e0ce;
+}
+
 #detalhe-playlist li button {
   min-height: 34px;
   margin-left: 8px;
@@ -130,6 +166,19 @@
 #detalhe-playlist li button:hover:not(:disabled) {
   color: #fffefa;
   background: var(--terra);
+}
+
+#detalhe-playlist .controles-ordem-playlist {
+  margin: 12px 0;
+}
+
+#detalhe-playlist .controles-ordem-playlist button {
+  color: #fffefa;
+  background: var(--verde-folha);
+}
+
+#detalhe-playlist .controles-ordem-playlist button:hover:not(:disabled) {
+  background: #3e6344;
 }
 
 #detalhe-playlist select {
@@ -153,6 +202,15 @@
 
   #form-criar-playlist input,
   #form-criar-playlist button {
+    width: 100%;
+  }
+
+  #detalhe-playlist .form-editar-playlist {
+    flex-direction: column;
+  }
+
+  #detalhe-playlist .form-editar-playlist input,
+  #detalhe-playlist .form-editar-playlist button {
     width: 100%;
   }
 
