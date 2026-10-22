@@ -269,6 +269,9 @@ async function abrirPlaylist(id) {
         botaoDescer.disabled = indice === musicas.length - 1;
         botaoDescer.setAttribute('aria-label', `Mover ${musica.nome} para baixo`);
 
+        const acoesMusica = document.createElement('div');
+        acoesMusica.className = 'acoes-musica-playlist';
+
         const botaoRemover = criarBotao('Remover', async () => {
           try {
             if (ordemAlterada) {
@@ -283,13 +286,16 @@ async function abrirPlaylist(id) {
           }
         });
 
-        item.append(
-          nome,
-          formato,
+        const informacoes = document.createElement('span');
+        informacoes.className = 'informacoes-musica-playlist';
+        informacoes.append(nome, formato);
+
+        acoesMusica.append(
           botaoSubir,
           botaoDescer,
           botaoRemover
         );
+        item.append(informacoes, acoesMusica);
         listaMusicas.appendChild(item);
       });
     }
