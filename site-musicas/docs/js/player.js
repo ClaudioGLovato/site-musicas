@@ -5,6 +5,7 @@ import { API_URL } from './config.js';
 let audio = new Audio();
 let playlistAtual = [];
 let indiceAtual = 0;
+let tentativaReproducao = 0;
 
 // Modos de loop: 'off' (desligado), 'one' (repetir música), 'all' (repetir playlist)
 let modoLoop = 'off'; 
@@ -71,6 +72,10 @@ function configurarEventos() {
   audio.addEventListener('timeupdate', atualizarProgresso);
   audio.addEventListener('ended', aoFinalizarMusica);
   audio.addEventListener('error', () => {
+    if (
+      typeof MediaError !== 'undefined' &&
+      audio.error?.code === MediaError.MEDIA_ERR_ABORTED
+    ) return;
     informarErroReproducao(audio.error);
   });
 
@@ -106,16 +111,19 @@ function carregarETocarAtual() {
 
   // Monta a URL completa utilizando a API_URL
   const urlAudio = musica.url.startsWith('http') ? musica.url : `${API_URL}${musica.url}`;
-  
+
+  const tentativa = ++tentativaReproducao;
   audio.src = urlAudio;
   audio.play()
     .then(() => {
+      if (tentativa !== tentativaReproducao) return;
       atualizarInterfacePlayPause(true);
     })
     .catch((err) => {
+      if (tentativa !== tentativaReproducao || err?.name === 'AbortError') return;
       atualizarInterfacePlayPause(false);
       informarErroReproducao(err);
-  });
+    });
 
   document.getElementById('player-nome').textContent = musica.nome;
 }
@@ -124,18 +132,22 @@ function alternarPlayPause() {
   if (!audio.src) return;
 
   if (audio.paused) {
-  audio.play()
-    .then(() => {
-      atualizarInterfacePlayPause(true);
-    })
-    .catch((err) => {
-      atualizarInterfacePlayPause(false);
-      informarErroReproducao(err);
-    });
-} else {
-  audio.pause();
-  atualizarInterfacePlayPause(false);
-}
+    const tentativa = ++tentativaReproducao;
+    audio.play()
+      .then(() => {
+        if (tentativa !== tentativaReproducao) return;
+        atualizarInterfacePlayPause(true);
+      })
+      .catch((err) => {
+        if (tentativa !== tentativaReproducao || err?.name === 'AbortError') return;
+        atualizarInterfacePlayPause(false);
+        informarErroReproducao(err);
+      });
+  } else {
+    tentativaReproducao++;
+    audio.pause();
+    atualizarInterfacePlayPause(false);
+  }
 }
 
 function informarErroReproducao(erro) {
