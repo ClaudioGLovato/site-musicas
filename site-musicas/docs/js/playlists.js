@@ -55,7 +55,7 @@ export function iniciarPlaylists() {
     try {
       const playlist = await criarPlaylist(nome, descricao);
       form.reset();
-      mostrarMensagem('Playlist criada com sucesso.');
+      mostrarMensagem('Playlist criada com sucesso.', 'sucesso');
       await carregarPlaylists();
       await abrirPlaylist(playlist.id);
     } catch (erro) {
@@ -66,9 +66,14 @@ export function iniciarPlaylists() {
   carregarPlaylists();
 }
 
-function mostrarMensagem(texto) {
+function mostrarMensagem(texto, tipo = 'erro') {
   const area = document.getElementById('mensagem-playlists');
-  if (area) area.textContent = texto;
+  if (!area) return;
+
+  area.textContent = texto;
+  area.className = `mensagem-playlists mensagem-playlists-${tipo}`;
+  area.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
+  area.setAttribute('aria-live', tipo === 'erro' ? 'assertive' : 'polite');
 }
 
 function criarBotao(texto, acao) {
@@ -117,7 +122,7 @@ async function carregarPlaylists() {
         try {
           await excluirPlaylist(playlist.id);
           document.getElementById('detalhe-playlist').replaceChildren();
-          mostrarMensagem('Playlist excluída com sucesso.');
+          mostrarMensagem('Playlist excluída com sucesso.', 'sucesso');
           await carregarPlaylists();
         } catch (erro) {
           mostrarMensagem(`Erro ao excluir playlist: ${erro.message}`);
@@ -199,7 +204,7 @@ async function abrirPlaylist(id) {
           nomeEditado.value.trim(),
           descricaoEditada.value.trim()
         );
-        mostrarMensagem('Playlist atualizada com sucesso.');
+        mostrarMensagem('Playlist atualizada com sucesso.', 'sucesso');
         await carregarPlaylists();
         await abrirPlaylist(playlist.id);
       } catch (erro) {
@@ -216,7 +221,7 @@ async function abrirPlaylist(id) {
 
       try {
         await reordenar(playlist.id, musicas.map((musica) => musica.id));
-        mostrarMensagem('Ordem das músicas salva.');
+        mostrarMensagem('Ordem das músicas salva.', 'sucesso');
         await abrirPlaylist(playlist.id);
       } catch (erro) {
         mostrarMensagem(`Erro ao salvar a ordem: ${erro.message}`);
@@ -270,7 +275,7 @@ async function abrirPlaylist(id) {
               await reordenar(playlist.id, musicas.map((itemMusica) => itemMusica.id));
             }
             await removerMusica(playlist.id, musica.id);
-            mostrarMensagem('Música removida da playlist.');
+            mostrarMensagem('Música removida da playlist.', 'sucesso');
             await abrirPlaylist(playlist.id);
             await carregarPlaylists();
           } catch (erro) {
@@ -305,7 +310,7 @@ async function abrirPlaylist(id) {
 
       try {
         await adicionarMusica(playlist.id, musicaId);
-        mostrarMensagem('Música adicionada à playlist.');
+        mostrarMensagem('Música adicionada à playlist.', 'sucesso');
         await abrirPlaylist(playlist.id);
         await carregarPlaylists();
       } catch (erro) {
