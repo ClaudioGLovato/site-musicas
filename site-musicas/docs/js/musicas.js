@@ -17,6 +17,7 @@ const listaMusicasBody = document.getElementById('lista-musicas-body');
 const pesquisaInput = document.getElementById('pesquisa-input');
 
 let musicasLocais = [];
+let musicasExibidas = [];
 let timerMensagem;
 
 export function iniciarMusicas() {
@@ -148,6 +149,7 @@ function filtrarMusicas() {
 }
 
 function renderizarTabela(musicas) {
+    musicasExibidas = musicas;
     listaMusicasBody.innerHTML = '';
     if (musicas.length === 0) {
         listaMusicasBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhuma música encontrada.</td></tr>';
@@ -198,8 +200,15 @@ async function confirmarExclusao(idStr) {
 
 function dispararEventoTocar(idStr) {
     const id = parseInt(idStr);
-    const musica = musicasLocais.find(m => m.id === id);
-    const evento = new CustomEvent('tocarMusicaRequisitada', { detail: musica });
+    const indice = musicasExibidas.findIndex((musica) => musica.id === id);
+    if (indice === -1) return;
+
+    const evento = new CustomEvent('tocarMusicaRequisitada', {
+        detail: {
+            musica: musicasExibidas[indice],
+            musicas: musicasExibidas,
+            indice,
+        },
+    });
     document.dispatchEvent(evento);
-    console.log("Evento 'tocarMusicaRequisitada' disparado:", musica);
 }
