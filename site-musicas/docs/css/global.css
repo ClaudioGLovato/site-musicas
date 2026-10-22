@@ -1,10 +1,205 @@
 /* Pessoa 3: estilo geral */
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; color: #222; background: #fafafa; }
-header { display: flex; align-items: center; justify-content: space-between;
-         padding: 12px 20px; background: #3b2f8f; color: #fff; }
-h1 { margin: 0; font-size: 1.2rem; }
-nav button { border: 0; padding: 8px 14px; margin-left: 6px; border-radius: 6px;
-             background: #ffffff33; color: #fff; cursor: pointer; }
-nav button.ativo { background: #fff; color: #3b2f8f; }
-main { padding: 20px 20px 90px; max-width: 800px; margin: 0 auto; }
+:root {
+  color-scheme: light;
+  --verde-floresta: #244b3b;
+  --verde-folha: #4f7654;
+  --verde-claro: #e5ecdf;
+  --areia: #f5f2e8;
+  --papel: #fffefa;
+  --terra: #a85f3d;
+  --terra-clara: #f3e5d9;
+  --texto: #27352d;
+  --texto-suave: #68756b;
+  --borda: #d9dfd3;
+  --sombra: 0 12px 30px rgb(36 75 59 / 8%);
+  --raio: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--texto);
+  background:
+    radial-gradient(ellipse at 90% 0%, rgb(208 220 194 / 38%), transparent 34rem),
+    var(--areia);
+  font-family: "Aptos", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.55;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px max(24px, calc((100% - 960px) / 2));
+  color: #fffdf5;
+  background: var(--verde-floresta);
+  border-bottom: 4px solid #b88a4a;
+  box-shadow: 0 5px 18px rgb(28 54 41 / 14%);
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.25rem, 3vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: 0.015em;
+}
+
+h2,
+h3,
+h4 {
+  color: var(--verde-floresta);
+}
+
+h2 {
+  margin: 0 0 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+}
+
+h3 {
+  margin-top: 0;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+}
+
+nav button,
+button {
+  min-height: 40px;
+  padding: 9px 15px;
+  color: var(--verde-floresta);
+  background: var(--verde-claro);
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease,
+    transform 160ms ease, box-shadow 160ms ease;
+}
+
+nav button {
+  color: #f5f3e8;
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 18%);
+}
+
+nav button.ativo {
+  color: var(--verde-floresta);
+  background: #f5f2e8;
+  border-color: #f5f2e8;
+}
+
+button:hover:not(:disabled) {
+  background-color: #d4e0ce;
+  transform: translateY(-1px);
+}
+
+nav button:hover:not(:disabled) {
+  color: #fff;
+  background: rgb(255 255 255 / 19%);
+}
+
+nav button.ativo:hover:not(:disabled) {
+  color: var(--verde-floresta);
+  background: #fffefa;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #c39048;
+  outline-offset: 2px;
+}
+
+button:disabled {
+  color: #899188;
+  background: #e8e9e3;
+  cursor: not-allowed;
+}
+
+input,
+select {
+  min-height: 42px;
+  padding: 9px 12px;
+  color: var(--texto);
+  background: var(--papel);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  font: inherit;
+}
+
+input::placeholder {
+  color: #899188;
+}
+
+main {
+  width: min(100% - 32px, 880px);
+  margin: 28px auto 0;
+  padding: 26px;
+}
+
+main section:not([hidden]) {
+  padding: clamp(20px, 4vw, 34px);
+  background: rgb(255 254 250 / 92%);
+  border: 1px solid rgb(217 223 211 / 85%);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--borda);
+}
+
+::selection {
+  color: #fffefa;
+  background: var(--verde-folha);
+}
+
+@media (max-width: 560px) {
+  header {
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  nav {
+    gap: 5px;
+  }
+
+  nav button {
+    min-height: 38px;
+    padding: 7px 10px;
+  }
+
+  main {
+    width: min(100% - 20px, 880px);
+    margin-top: 14px;
+    padding: 8px 0 90px;
+  }
+
+  main section:not([hidden]) {
+    padding: 20px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
