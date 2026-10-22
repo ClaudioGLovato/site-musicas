@@ -1,7 +1,6 @@
 // Pessoa 1: tela de upload e biblioteca de músicas
-// TODO: input de arquivo, validar mp3/wav/ogg e tamanho, barra de progresso (XMLHttpRequest),
-//       listar músicas, buscar por nome, excluir, botão "tocar" (chama tocar() do player.js)
 import { API_URL } from './config.js';
+import { excluirMusica, listarMusicas, mensagemErroHttp } from './api.js';
 
 const TAMANHO_MAXIMO_MB = 50;
 const TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024;
@@ -24,12 +23,17 @@ export function iniciarMusicas() {
     carregarMusicas();
     configurarEventosUpload();
     pesquisaInput.addEventListener('input', filtrarMusicas);
+    document.addEventListener('mensagemPlayer', (evento) => {
+        mostrarMensagem(evento.detail, 'erro');
+    });
 }
 
 function mostrarMensagem(texto, tipo) {
     clearTimeout(timerMensagem);
     mensagemArea.textContent = texto;
     mensagemArea.className = `mensagem ${tipo}`;
+    mensagemArea.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
+    mensagemArea.setAttribute('aria-live', tipo === 'erro' ? 'assertive' : 'polite');
     mensagemArea.classList.remove('oculto');
     timerMensagem = setTimeout(() => {
         mensagemArea.classList.add('oculto');
@@ -57,14 +61,14 @@ function configurarEventosUpload() {
 
 function processarArquivo(arquivo) {
     if (arquivo.size > TAMANHO_MAXIMO_BYTES) {
-        mostrarMensagem(`Erro: O ficheiro excede o limite de ${TAMANHO_MAXIMO_MB} MB.`, 'erro');
+        mostrarMensagem(`O arquivo excede o limite de ${TAMANHO_MAXIMO_MB} MB.`, 'erro');
         arquivoInput.value = "";
         return;
     }
     const nomeArquivo = arquivo.name.toLowerCase();
     const formatoValido = FORMATOS_PERMITIDOS.some(ext => nomeArquivo.endsWith(ext) || arquivo.type === ext);
     if (!formatoValido) {
-        mostrarMensagem('Erro: Formato não suportado. Use apenas MP3, WAV ou OGG.', 'erro');
+        mostrarMensagem('Formato não aceito. Escolha um arquivo MP3, WAV ou OGG.', 'erro');
         arquivoInput.value = "";
         return;
     }
@@ -92,38 +96,46 @@ function enviarMusica(arquivo) {
     xhr.onload = function () {
         progressoContainer.classList.add('oculto');
         arquivoInput.value = "";
+        let resposta;
         try {
-            const resposta = JSON.parse(xhr.responseText);
-            if (xhr.status === 201 && resposta.sucesso) {
-                mostrarMensagem('Música enviada com sucesso!', 'sucesso');
-                musicasLocais.unshift(resposta.dados);
-                renderizarTabela(musicasLocais);
-            } else {
-                mostrarMensagem(resposta.erro || 'Erro ao enviar a música.', 'erro');
-            }
-        } catch (err) {
-            mostrarMensagem('Erro. Certifique-se de que a API backend está a correr em localhost:3000.', 'erro');
+            resposta = JSON.parse(xhr.responseText);
+        } catch {
+            mostrarMensagem('O servidor retornou uma resposta inválida. Tente novamente mais tarde.', 'erro');
+            return;
+        }
+
+        if (!resposta || typeof resposta !== 'object') {
+            mostrarMensagem('O servidor retornou uma resposta inválida. Tente novamente mais tarde.', 'erro');
+            return;
+        }
+
+        if (xhr.status === 201 && resposta.sucesso) {
+            mostrarMensagem('Música enviada com sucesso.', 'sucesso');
+            musicasLocais.unshift(resposta.dados);
+            renderizarTabela(musicasLocais);
+        } else {
+            const mensagemServidor = typeof resposta.erro === 'string' ? resposta.erro : null;
+            mostrarMensagem(mensagemErroHttp(xhr.status, mensagemServidor), 'erro');
         }
     };
     xhr.onerror = function () {
         progressoContainer.classList.add('oculto');
-        mostrarMensagem('Erro de rede. A API Node.js está a correr em localhost:3000?', 'erro');
+        arquivoInput.value = "";
+        mostrarMensagem('Não foi possível enviar o arquivo. Verifique sua conexão e tente novamente.', 'erro');
     };
     xhr.send(formData);
 }
 
 async function carregarMusicas() {
     try {
-        const resposta = await fetch(`${API_URL}/api/musicas`);
-        const json = await resposta.json();
-        if (resposta.ok && json.sucesso) {
-            musicasLocais = json.dados;
-            renderizarTabela(musicasLocais);
-        } else {
-            mostrarMensagem(json.erro || 'Erro ao carregar a biblioteca.', 'erro');
+        const musicas = await listarMusicas();
+        if (!Array.isArray(musicas)) {
+            throw new Error('O servidor retornou uma lista de músicas inválida.');
         }
+        musicasLocais = musicas;
+        renderizarTabela(musicasLocais);
     } catch (erro) {
-        mostrarMensagem('Sem conexão à API. Inicie o backend (Node.js) em localhost:3000', 'erro');
+        mostrarMensagem(`Não foi possível carregar as músicas. ${erro.message}`, 'erro');
     }
 }
 
@@ -167,19 +179,19 @@ function renderizarTabela(musicas) {
 async function confirmarExclusao(idStr) {
     const id = parseInt(idStr);
     const musica = musicasLocais.find(m => m.id === id);
+    if (!musica) {
+        mostrarMensagem('Não foi possível localizar essa música na lista. Atualize a página e tente novamente.', 'erro');
+        return;
+    }
+
     if (confirm(`Tem a certeza que deseja excluir "${musica.nome}"?`)) {
         try {
-            const resposta = await fetch(`${API_URL}/api/musicas/${id}`, { method: 'DELETE' });
-            const json = await resposta.json();
-            if (resposta.ok && json.sucesso) {
-                mostrarMensagem('Música excluída com sucesso.', 'sucesso');
-                musicasLocais = musicasLocais.filter(m => m.id !== id);
-                filtrarMusicas();
-            } else {
-                mostrarMensagem(json.erro || 'Erro ao excluir.', 'erro');
-            }
+            await excluirMusica(id);
+            mostrarMensagem('Música excluída com sucesso.', 'sucesso');
+            musicasLocais = musicasLocais.filter(m => m.id !== id);
+            filtrarMusicas();
         } catch (erro) {
-            mostrarMensagem('Erro de comunicação ao excluir.', 'erro');
+            mostrarMensagem(`Não foi possível excluir a música. ${erro.message}`, 'erro');
         }
     }
 }
