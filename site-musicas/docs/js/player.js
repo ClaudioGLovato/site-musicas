@@ -70,6 +70,9 @@ function configurarEventos() {
   // Atualização continuada da barra de progresso e tempos
   audio.addEventListener('timeupdate', atualizarProgresso);
   audio.addEventListener('ended', aoFinalizarMusica);
+  audio.addEventListener('error', () => {
+    informarErroReproducao(audio.error);
+  });
 
   // Escuta o evento disparado pelo botão "Tocar" da tela de Músicas (Pessoa 1)
   document.addEventListener('tocarMusicaRequisitada', (e) => {
@@ -107,8 +110,8 @@ function carregarETocarAtual() {
       atualizarInterfacePlayPause(true);
     })
     .catch((err) => {
-  atualizarInterfacePlayPause(false);
-  console.error('Erro ao tocar áudio:', err);
+      atualizarInterfacePlayPause(false);
+      informarErroReproducao(err);
   });
 
   document.getElementById('player-nome').textContent = musica.nome;
@@ -124,12 +127,25 @@ function alternarPlayPause() {
     })
     .catch((err) => {
       atualizarInterfacePlayPause(false);
-      console.error('Erro ao tocar áudio:', err);
+      informarErroReproducao(err);
     });
 } else {
   audio.pause();
   atualizarInterfacePlayPause(false);
 }
+}
+
+function informarErroReproducao(erro) {
+  const mensagem = erro?.name === 'NotAllowedError'
+    ? 'O navegador bloqueou a reprodução. Pressione Tocar para tentar novamente.'
+    : erro?.name === 'NotSupportedError' ||
+      (typeof MediaError !== 'undefined' &&
+        audio.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+      ? 'Este formato de áudio não pode ser reproduzido neste navegador.'
+      : 'Não foi possível carregar o áudio. Verifique sua conexão e tente novamente.';
+
+  document.dispatchEvent(new CustomEvent('mensagemPlayer', { detail: mensagem }));
+  console.error('Erro ao reproduzir áudio:', erro);
 }
 
 function atualizarInterfacePlayPause(estaTocando) {
