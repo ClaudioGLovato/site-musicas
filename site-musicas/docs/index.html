@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Saroba Music Player</title>
+  <link rel="stylesheet" href="./css/global.css">
+  <link rel="stylesheet" href="./css/musicas.css">
+  <link rel="stylesheet" href="./css/playlists.css">
+  <link rel="stylesheet" href="./css/player.css">
+</head>
+<body>
+  <header>
+    <h1>Saroba Music Player</h1>
+    <nav>
+      <button data-tela="musicas" class="ativo">Músicas</button>
+      <button data-tela="playlists">Playlists</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- TELA DE MÚSICAS (Conteúdo da Pessoa 1 integrado aqui dentro) -->
+    <section id="tela-musicas">
+      <div id="biblioteca-musicas" class="seccao-ativa">
+        <h2>Biblioteca de Músicas</h2>
+
+        <!-- Área de Mensagens -->
+        <div id="mensagem-area" class="mensagem oculto"></div>
+
+        <!-- Área de Upload (Drag and Drop) -->
+        <div id="upload-zone" class="dropzone">
+          <p>Arraste e solte o seu ficheiro de áudio aqui ou</p>
+          <input type="file" id="arquivo-input" accept=".mp3, .wav, .ogg" class="oculto" />
+          <button id="btn-selecionar" class="btn btn-primario">Selecionar Ficheiro</button>
+          <p class="nota">Formatos aceites: MP3, WAV, OGG (Máx: 50 MB)</p>
+        </div>
+
+        <!-- Barra de Progresso do Upload -->
+        <div id="progresso-container" class="oculto">
+          <div class="barra-fundo">
+            <div id="barra-progresso" class="barra-preenchimento"></div>
+          </div>
+          <span id="texto-progresso">0%</span>
+        </div>
+
+        <hr class="separador">
+
+        <!-- Listagem e Filtro -->
+        <div class="lista-header">
+          <h3>As Minhas Músicas</h3>
+          <input type="text" id="pesquisa-input" placeholder="Pesquisar música por nome..." />
+        </div>
+
+        <table id="tabela-musicas" class="tabela">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Formato</th>
+              <th>Tamanho</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-musicas-body">
+            <!-- As músicas serão injetadas aqui pelo JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TELA DE PLAYLISTS -->
+    <section id="tela-playlists" hidden>
+      <!-- Conteúdo de playlists entra aqui futuramente -->
+    </section>
+  </main>
+
+  <!-- Player fixo -->
+  <footer id="player">
+    <span id="player-nome">Nenhuma música tocando</span>
+  </footer>
+
+  <!-- Script principal que gerencia as abas e inicializa tudo -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
