@@ -186,7 +186,7 @@ async function confirmarExclusao(idStr) {
         return;
     }
 
-    if (confirm(`Tem a certeza que deseja excluir "${musica.nome}"?`)) {
+    if (confirm(`Tem certeza que deseja excluir "${musica.nome}"?`)) {
         try {
             await excluirMusica(id);
             mostrarMensagem('Música excluída com sucesso.', 'sucesso');
