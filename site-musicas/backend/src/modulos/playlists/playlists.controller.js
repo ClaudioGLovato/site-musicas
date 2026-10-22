@@ -146,7 +146,7 @@ function adicionarMusica(req, res) {
   if (!id) return erro(res, 'O id da playlist deve ser um número válido.', 400);
 
   const musicaId = parseId((req.body || {}).musicaId);
-  if (!musicaId) return erro(res, 'O musicaId deve ser um número válido.', 400);
+  if (!musicaId) return erro(res, 'O id da música deve ser um número válido.', 400);
 
   if (!buscarPlaylist(id)) return erro(res, 'Playlist não encontrada.', 404);
   if (!musicaExiste(musicaId)) return erro(res, 'Música não encontrada.', 404);
