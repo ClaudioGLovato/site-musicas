@@ -1,176 +1,251 @@
-// Pessoa 2: tela de playlists
-import { API_URL } from './config.js';
+//Pessoa 2
+import {
+  listarMusicas,
+  listarPlaylists,
+  consultarPlaylist,
+  criarPlaylist,
+  excluirPlaylist,
+  adicionarMusica,
+  removerMusica,
+} from './api.js';
+import { tocar } from './player.js';
 
 export function iniciarPlaylists() {
-    const container = document.getElementById('tela-playlists');
-    if (!container) return;
+  const container = document.getElementById('tela-playlists');
+  if (!container) return;
 
-    // Monta a estrutura da tela de playlists
-    container.innerHTML = `
-        <h2>Gerenciar Playlists</h2>
-        
-        <!-- Formulário para Criar Playlist -->
-        <form id="form-criar-playlist" style="margin-bottom: 20px;">
-            <input type="text" id="nome-playlist" placeholder="Nome da Playlist" required style="padding: 8px; margin-right: 5px;">
-            <input type="text" id="desc-playlist" placeholder="Descrição (opcional)" style="padding: 8px; margin-right: 5px;">
-            <button type="submit" style="padding: 8px 12px;">Criar Playlist</button>
-        </form>
+  container.innerHTML = `
+    <h2>Gerenciar Playlists</h2>
 
-        <hr>
+    <form id="form-criar-playlist" style="margin-bottom: 20px;">
+      <input
+        type="text"
+        id="nome-playlist"
+        placeholder="Nome da Playlist"
+        required
+        style="padding: 8px; margin-right: 5px;"
+      >
+      <input
+        type="text"
+        id="desc-playlist"
+        placeholder="Descrição (opcional)"
+        style="padding: 8px; margin-right: 5px;"
+      >
+      <button type="submit" style="padding: 8px 12px;">Criar Playlist</button>
+    </form>
 
-        <!-- Lista de Playlists -->
-        <h3>Suas Playlists</h3>
-        <div id="lista-playlists">Carregando playlists...</div>
+    <p id="mensagem-playlists" role="status"></p>
+    <hr>
 
-        <!-- Detalhes da Playlist selecionada -->
-        <div id="detalhe-playlist" style="margin-top: 20px;"></div>
-    `;
+    <h3>Suas Playlists</h3>
+    <div id="lista-playlists">Carregando playlists...</div>
 
-    // Ativa o formulário de criar playlist
-    const formCriar = document.getElementById('form-criar-playlist');
-    formCriar.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const nome = document.getElementById('nome-playlist').value;
-        const descricao = document.getElementById('desc-playlist').value;
+    <div id="detalhe-playlist" style="margin-top: 20px;"></div>
+  `;
+
+  const form = container.querySelector('#form-criar-playlist');
+
+  form.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+
+    const nome = container.querySelector('#nome-playlist').value.trim();
+    const descricao = container.querySelector('#desc-playlist').value.trim();
+
+    try {
+      const playlist = await criarPlaylist(nome, descricao);
+      form.reset();
+      mostrarMensagem('Playlist criada com sucesso.');
+      await carregarPlaylists();
+      await abrirPlaylist(playlist.id);
+    } catch (erro) {
+      mostrarMensagem(`Erro ao criar playlist: ${erro.message}`);
+    }
+  });
+
+  carregarPlaylists();
+}
+
+function mostrarMensagem(texto) {
+  const area = document.getElementById('mensagem-playlists');
+  if (area) area.textContent = texto;
+}
+
+function criarBotao(texto, acao) {
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.textContent = texto;
+  botao.addEventListener('click', acao);
+  return botao;
+}
+
+async function carregarPlaylists() {
+  const lista = document.getElementById('lista-playlists');
+  if (!lista) return;
+
+  lista.textContent = 'Carregando playlists...';
+
+  try {
+    const playlists = await listarPlaylists();
+    lista.replaceChildren();
+
+    if (playlists.length === 0) {
+      lista.textContent = 'Nenhuma playlist encontrada.';
+      return;
+    }
+
+    playlists.forEach((playlist) => {
+      const item = document.createElement('div');
+      item.className = 'playlist-item';
+
+      const titulo = document.createElement('h3');
+      titulo.textContent = playlist.nome;
+
+      const descricao = document.createElement('p');
+      descricao.textContent = playlist.descricao || '';
+
+      const total = document.createElement('span');
+      total.textContent = `${playlist.totalMusicas || 0} músicas`;
+
+      const botaoAbrir = criarBotao('Ver / Adicionar Músicas', () => {
+        abrirPlaylist(playlist.id);
+      });
+
+      const botaoExcluir = criarBotao('Excluir', async () => {
+        if (!confirm('Tem certeza que deseja apagar esta playlist?')) return;
 
         try {
-            const resposta = await fetch(${API_URL}/api/playlists, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, descricao })
-            });
-            const resultado = await resposta.json();
-            
-            if (resultado.sucesso) {
-                document.getElementById('nome-playlist').value = '';
-                document.getElementById('desc-playlist').value = '';
-                carregarPlaylists();
-            } else {
-                alert('Erro: ' + resultado.erro);
-            }
+          await excluirPlaylist(playlist.id);
+          document.getElementById('detalhe-playlist').replaceChildren();
+          mostrarMensagem('Playlist excluída com sucesso.');
+          await carregarPlaylists();
         } catch (erro) {
-            console.error('Erro ao criar playlist:', erro);
+          mostrarMensagem(`Erro ao excluir playlist: ${erro.message}`);
         }
+      });
+
+      item.append(titulo, descricao, total, document.createElement('br'), botaoAbrir, botaoExcluir);
+      lista.appendChild(item);
+    });
+  } catch (erro) {
+    lista.textContent = 'Não foi possível carregar as playlists.';
+    mostrarMensagem(`Erro ao carregar playlists: ${erro.message}`);
+  }
+}
+
+async function abrirPlaylist(id) {
+  const container = document.getElementById('detalhe-playlist');
+  if (!container) return;
+
+  try {
+    const playlist = await consultarPlaylist(id);
+    const musicas = Array.isArray(playlist.musicas) ? playlist.musicas : [];
+
+    container.replaceChildren();
+
+    const painel = document.createElement('div');
+    painel.style.cssText = 'border: 2px dashed #007bff; padding: 15px; border-radius: 8px;';
+
+    const titulo = document.createElement('h2');
+    titulo.textContent = `Playlist: ${playlist.nome}`;
+
+    const descricao = document.createElement('p');
+    descricao.textContent = playlist.descricao || 'Sem descrição';
+
+    const tituloMusicas = document.createElement('h4');
+    tituloMusicas.textContent = 'Músicas na playlist:';
+
+    const listaMusicas = document.createElement('ul');
+
+    if (musicas.length === 0) {
+      const itemVazio = document.createElement('li');
+      itemVazio.textContent = 'Nenhuma música adicionada ainda.';
+      listaMusicas.appendChild(itemVazio);
+    } else {
+      musicas.forEach((musica) => {
+        const item = document.createElement('li');
+        const nome = document.createElement('strong');
+        nome.textContent = musica.nome;
+
+        const formato = document.createTextNode(` (${musica.formato}) `);
+        const botaoRemover = criarBotao('Remover', async () => {
+          try {
+            await removerMusica(playlist.id, musica.id);
+            mostrarMensagem('Música removida da playlist.');
+            await abrirPlaylist(playlist.id);
+            await carregarPlaylists();
+          } catch (erro) {
+            mostrarMensagem(`Erro ao remover música: ${erro.message}`);
+          }
+        });
+
+        item.append(nome, formato, botaoRemover);
+        listaMusicas.appendChild(item);
+      });
+    }
+
+    const botaoTocar = criarBotao('▶ Tocar Playlist', () => {
+      if (musicas.length === 0) {
+        mostrarMensagem('A playlist está vazia.');
+        return;
+      }
+
+      tocar(musicas, 0);
+    });
+    botaoTocar.disabled = musicas.length === 0;
+
+    const areaAdicionar = document.createElement('div');
+    const tituloAdicionar = document.createElement('h4');
+    tituloAdicionar.textContent = 'Adicionar música';
+
+    const seletor = document.createElement('select');
+    seletor.setAttribute('aria-label', 'Escolha uma música para adicionar');
+
+    const botaoAdicionar = criarBotao('Adicionar', async () => {
+      const musicaId = Number(seletor.value);
+      if (!musicaId) return;
+
+      try {
+        await adicionarMusica(playlist.id, musicaId);
+        mostrarMensagem('Música adicionada à playlist.');
+        await abrirPlaylist(playlist.id);
+        await carregarPlaylists();
+      } catch (erro) {
+        mostrarMensagem(`Erro ao adicionar música: ${erro.message}`);
+      }
     });
 
-    // Carrega as playlists existentes
-    carregarPlaylists();
-}
+    const biblioteca = await listarMusicas();
+    const idsNaPlaylist = new Set(musicas.map((musica) => musica.id));
+    const disponiveis = biblioteca.filter((musica) => !idsNaPlaylist.has(musica.id));
 
-// Função para buscar e listar as playlists da API
-async function carregarPlaylists() {
-    const listaDiv = document.getElementById('lista-playlists');
-    if (!listaDiv) return;
-
-    try {
-        const resposta = await fetch(${API_URL}/api/playlists);
-        const resultado = await resposta.json();
-
-        if (resultado.sucesso) {
-            if (resultado.dados.length === 0) {
-                listaDiv.innerHTML = '<p>Nenhuma playlist encontrada.</p>';
-                return;
-            }
-
-            listaDiv.innerHTML = '';
-            resultado.dados.forEach(playlist => {
-                const item = document.createElement('div');
-                item.className = 'playlist-item';
-                item.innerHTML = `
-                    <h3>${playlist.nome}</h3>
-                    <p>${playlist.descricao || ''}</p>
-                    <span>${playlist.totalMusicas || 0} músicas</span><br><br>
-                    <button onclick="abrirPlaylist(${playlist.id})">Ver / Adicionar Músicas</button>
-                    <button onclick="excluirPlaylist(${playlist.id})">Excluir</button>
-                `;
-                listaDiv.appendChild(item);
-            });
-        }
-    } catch (erro) {
-        listaDiv.innerHTML = '<p>Servidor ainda não conectado ou offline.</p>';
-        console.error('Erro ao carregar playlists:', erro);
-    }
-}
-
-// Apagar Playlist
-window.excluirPlaylist = async function(id) {
-    if (!confirm('Tem certeza que deseja apagar esta playlist?')) return;
-
-    try {
-        const resposta = await fetch(${API_URL}/api/playlists/${id}, {
-            method: 'DELETE'
-        });
-        const resultado = await resposta.json();
-        if (resultado.sucesso) {
-            document.getElementById('detalhe-playlist').innerHTML = '';
-            carregarPlaylists();
-        } else {
-            alert('Erro ao excluir: ' + resultado.erro);
-        }
-    } catch (erro) {
-        console.error('Erro ao excluir playlist:', erro);
-    }
-};
-
-// Abrir Playlist para ver as músicas
-window.abrirPlaylist = async function(id) {
-    try {
-        const resposta = await fetch(${API_URL}/api/playlists/${id});
-        const resultado = await resposta.json();
-
-        if (resultado.sucesso) {
-            const p = resultado.dados;
-            const container = document.getElementById('detalhe-playlist');
-            if (!container) return;
-
-            let htmlMusicas = p.musicas ? p.musicas.map(m => `
-                <li>
-                    <strong>${m.nome}</strong> (${m.formato}) 
-                    <button onclick="removerMusica(${p.id}, ${m.id})">Remover</button>
-                </li>
-            `).join('') : '';
-
-            container.innerHTML = `
-                <div style="border: 2px dashed #007bff; padding: 15px; border-radius: 8px;">
-                    <h2>Playlist: ${p.nome}</h2>
-                    <p>${p.descricao || 'Sem descrição'}</p>
-                    
-                    <h4>Músicas na playlist:</h4>
-                    <ul>${htmlMusicas.length ? htmlMusicas : '<li>Nenhuma música adicionada ainda.</li>'}</ul>
-
-                    <button onclick="tocarPlaylist(${JSON.stringify(p.musicas || []).replace(/"/g, '&quot;')})">▶️ Tocar Playlist</button>
-                </div>
-            `;
-        }
-    } catch (erro) {
-        console.error('Erro ao abrir playlist:', erro);
-    }
-};
-
-// Remover música da playlist
-window.removerMusica = async function(playlistId, musicaId) {
-    try {
-        const resposta = await fetch(${API_URL}/api/playlists/${playlistId}/musicas/${musicaId}, {
-            method: 'DELETE'
-        });
-        const resultado = await resposta.json();
-        if (resultado.sucesso) {
-            window.abrirPlaylist(playlistId);
-        }
-    } catch (erro) {
-        console.error('Erro ao remover música:', erro);
-    }
-};
-
-// Tocar a playlist no Player 
-window.tocarPlaylist = function(musicas) {
-    if (!musicas || musicas.length === 0) {
-        alert('A playlist está vazia!');
-        return;
-    }
-    if (window.tocarFila && typeof window.tocarFila === 'function') {
-        window.tocarFila(musicas, 0);
+    if (disponiveis.length === 0) {
+      const aviso = document.createElement('p');
+      aviso.textContent = biblioteca.length === 0
+        ? 'Cadastre músicas antes de adicioná-las a uma playlist.'
+        : 'Todas as músicas da biblioteca já estão nesta playlist.';
+      areaAdicionar.append(tituloAdicionar, aviso);
     } else {
-        alert('Player de áudio ainda não integrado.');
+      disponiveis.forEach((musica) => {
+        const opcao = document.createElement('option');
+        opcao.value = musica.id;
+        opcao.textContent = musica.nome;
+        seletor.appendChild(opcao);
+      });
+
+      areaAdicionar.append(tituloAdicionar, seletor, botaoAdicionar);
     }
-};
+
+    painel.append(
+      titulo,
+      descricao,
+      tituloMusicas,
+      listaMusicas,
+      botaoTocar,
+      areaAdicionar
+    );
+
+    container.appendChild(painel);
+  } catch (erro) {
+    mostrarMensagem(`Erro ao abrir playlist: ${erro.message}`);
+  }
+}
