@@ -76,9 +76,12 @@ function configurarEventos() {
 
   // Escuta o evento disparado pelo botão "Tocar" da tela de Músicas (Pessoa 1)
   document.addEventListener('tocarMusicaRequisitada', (e) => {
-    const musica = e.detail;
+    const detalhe = e.detail;
+    const musica = detalhe?.musica || detalhe;
     if (musica) {
-      tocar([musica], 0);
+      const musicas = Array.isArray(detalhe?.musicas) ? detalhe.musicas : [musica];
+      const indice = Number.isInteger(detalhe?.indice) ? detalhe.indice : 0;
+      tocar(musicas, indice);
     }
   });
 }
