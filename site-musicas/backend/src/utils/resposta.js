@@ -1,4 +1,4 @@
-// Pessoa 3: padrão das respostas JSON
+// Padrão das respostas JSON (para o backend)
 const ok = (res, dados, mensagem, status = 200) =>
   res.status(status).json({ sucesso: true, dados, ...(mensagem && { mensagem }) });
 
