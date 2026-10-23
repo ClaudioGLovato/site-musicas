@@ -19,7 +19,7 @@
   </header>
 
   <main>
-    <!-- TELA DE MÚSICAS (Conteúdo da Pessoa 1 integrado aqui dentro) -->
+    <!-- TELA DE MÚSICAS -->
     <section id="tela-musicas">
       <div id="biblioteca-musicas" class="seccao-ativa">
         <h2>Biblioteca de Músicas</h2>
@@ -27,7 +27,7 @@
         <!-- Área de Mensagens -->
         <div id="mensagem-area" class="mensagem oculto"></div>
 
-        <!-- Área de Upload (Drag and Drop) -->
+        <!-- Área de Upload -->
         <div id="upload-zone" class="dropzone">
           <p>Arraste e solte o seu arquivo de áudio aqui ou</p>
           <input type="file" id="arquivo-input" accept=".mp3, .wav, .ogg" class="oculto" />
@@ -61,7 +61,6 @@
             </tr>
           </thead>
           <tbody id="lista-musicas-body">
-            <!-- As músicas serão injetadas aqui pelo JavaScript -->
           </tbody>
         </table>
       </div>
@@ -69,7 +68,6 @@
 
     <!-- TELA DE PLAYLISTS -->
     <section id="tela-playlists" hidden>
-      <!-- Conteúdo de playlists entra aqui futuramente -->
     </section>
   </main>
 
@@ -78,7 +76,7 @@
     <span id="player-nome">Nenhuma música tocando</span>
   </footer>
 
-  <!-- Script principal que gerencia as abas e inicializa tudo -->
+  <!-- Abas e incialização -->
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>
