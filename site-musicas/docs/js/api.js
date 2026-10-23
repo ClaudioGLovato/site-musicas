@@ -46,7 +46,7 @@ async function pedir(caminho, opcoes = {}) {
 }
 const corpo = (obj) => JSON.stringify(obj);
 
-// Músicas (o upload usa XMLHttpRequest e fica em musicas.js, Pessoa 1)
+// Músicas
 export const listarMusicas = () => pedir('/musicas');
 export const consultarMusica = (id) => pedir(`/musicas/${id}`);
 export const excluirMusica = (id) => pedir(`/musicas/${id}`, { method: 'DELETE' });
