@@ -1,4 +1,4 @@
-// Pessoa 1
+// Rotas das músicas
 const router = require('express').Router();
 const c = require('./musicas.controller');
 const upload = require('./musicas.upload');
