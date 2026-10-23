@@ -1,4 +1,4 @@
-// Pessoa 3: monta o Express
+// Montagem do Express
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -7,7 +7,7 @@ const { rotaNaoEncontrada, tratadorDeErros } = require('./middlewares/erros');
 
 const app = express();
 
-// CORS: só protocolo + domínio, sem caminho. Ex.: https://usuario.github.io
+//  Montagem do CORS
 const origens = [process.env.FRONTEND_URL, 'http://localhost:5500', 'http://127.0.0.1:5500']
   .filter(Boolean);
 app.use(cors({ origin: origens }));
