@@ -1,4 +1,4 @@
-// Pessoa 2: regras das rotas de playlists
+// Regras das rotas de playlists
 const path = require('path');
 const db = require('../../database/conexao');
 const { ok, erro } = require('../../utils/resposta');
