@@ -1,4 +1,4 @@
-// Pessoa 1: tela de upload e biblioteca de músicas
+// Tela de upload e biblioteca de músicas
 import { API_URL } from './config.js';
 import { excluirMusica, listarMusicas, mensagemErroHttp } from './api.js';
 
