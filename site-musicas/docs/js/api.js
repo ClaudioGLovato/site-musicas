@@ -1,4 +1,4 @@
-// Pessoa 3: todas as chamadas ao backend ficam aqui.
+// Chamadas ao backend
 import { API_URL } from './config.js';
 
 export function mensagemErroHttp(status, mensagemServidor) {
