@@ -1,5 +1,5 @@
 
-// Pessoa 3: player de áudio fixo no rodapé
+// Player de áudio 
 import { API_URL } from './config.js';
 
 let audio = new Audio();
@@ -7,14 +7,13 @@ let playlistAtual = [];
 let indiceAtual = 0;
 let tentativaReproducao = 0;
 
-// Modos de loop: 'off' (desligado), 'one' (repetir música), 'all' (repetir playlist)
+
 let modoLoop = 'off'; 
 
 export function iniciarPlayer() {
   const containerPlayer = document.getElementById('player');
   if (!containerPlayer) return;
 
-  // Injeta dinamicamente a interface do Player no HTML
   containerPlayer.innerHTML = `
     <div class="player-info">
       <span id="player-nome">Nenhuma música selecionada</span>
@@ -50,25 +49,21 @@ function configurarEventos() {
   const barraProgresso = document.getElementById('barra-progresso-player');
   const barraVolume = document.getElementById('barra-volume');
 
-  // Controles de clique
   btnPlayPause.addEventListener('click', alternarPlayPause);
   btnAnterior.addEventListener('click', musicaAnterior);
   btnProxima.addEventListener('click', proximaMusica);
   btnLoop.addEventListener('click', alternarModoLoop);
 
-  // Alterar tempo da música pela barra de progresso
   barraProgresso.addEventListener('input', (e) => {
     if (audio.duration) {
       audio.currentTime = (e.target.value / 100) * audio.duration;
     }
   });
 
-  // Controle de Volume
   barraVolume.addEventListener('input', (e) => {
     audio.volume = e.target.value;
   });
 
-  // Atualização continuada da barra de progresso e tempos
   audio.addEventListener('timeupdate', atualizarProgresso);
   audio.addEventListener('ended', aoFinalizarMusica);
   audio.addEventListener('error', () => {
@@ -79,7 +74,6 @@ function configurarEventos() {
     informarErroReproducao(audio.error);
   });
 
-  // Escuta o evento disparado pelo botão "Tocar" da tela de Músicas (Pessoa 1)
   document.addEventListener('tocarMusicaRequisitada', (e) => {
     const detalhe = e.detail;
     const musica = detalhe?.musica || detalhe;
@@ -91,11 +85,6 @@ function configurarEventos() {
   });
 }
 
-/**
- * Função exportada para que outras telas/módulos possam tocar uma lista de músicas
- * @param {Array} listaDeMusicas - Array de objetos de música vindos do banco/API
- * @param {Number} indiceInicial - Índice da música por onde começar
- */
 export function tocar(listaDeMusicas, indiceInicial = 0) {
   if (!listaDeMusicas || listaDeMusicas.length === 0) return;
 
@@ -108,8 +97,7 @@ export function tocar(listaDeMusicas, indiceInicial = 0) {
 function carregarETocarAtual() {
   const musica = playlistAtual[indiceAtual];
   if (!musica) return;
-
-  // Monta a URL completa utilizando a API_URL
+  
   const urlAudio = musica.url.startsWith('http') ? musica.url : `${API_URL}${musica.url}`;
 
   const tentativa = ++tentativaReproducao;
