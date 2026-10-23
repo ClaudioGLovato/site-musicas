@@ -1,4 +1,4 @@
-// Pessoa 3: liga tudo e controla a troca de telas
+// liga tudo e controla a troca de abas
 import { iniciarMusicas } from './musicas.js';
 import { iniciarPlaylists } from './playlists.js';
 import { iniciarPlayer } from './player.js';
