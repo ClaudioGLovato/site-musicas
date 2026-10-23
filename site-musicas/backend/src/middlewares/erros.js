@@ -1,4 +1,4 @@
-// Pessoa 3: erros sempre em JSON
+//Erros e mensagens para o frontend
 const { erro } = require('../utils/resposta');
 
 const rotaNaoEncontrada = (req, res) => erro(res, 'Rota não encontrada', 404);
