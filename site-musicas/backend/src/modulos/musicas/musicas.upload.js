@@ -1,4 +1,4 @@
-// Pessoa 1: configuração do Multer
+// Configuração do Multer
 
 const multer = require('multer');
 const path = require('path');
