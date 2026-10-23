@@ -1,8 +1,8 @@
-// Pessoa 3: cria as tabelas se ainda não existirem
+// Cria as tabelas do SQlite se ainda não existirem
 const db = require('./conexao');
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS musicas (
+  CREATE TABLE IF NOT EXISTS musicas (      
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     nome      TEXT    NOT NULL,
     formato   TEXT    NOT NULL,
