@@ -1,4 +1,4 @@
-// Pessoa 3
+// Inicia e roda o servidor
 require('dotenv').config();
 const app = require('./app');
 
