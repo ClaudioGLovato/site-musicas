@@ -1,4 +1,4 @@
-// Pessoa 2
+// Rotas da playlist
 const { Router } = require('express');
 const c = require('./playlists.controller');
 
