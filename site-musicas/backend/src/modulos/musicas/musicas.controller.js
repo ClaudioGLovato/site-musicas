@@ -1,4 +1,4 @@
-// Pessoa 1: regras das rotas de músicas
+// Regras das rotas de músicas
 const fs = require('fs');
 const path = require('path');
 const db = require('../../database/conexao');
